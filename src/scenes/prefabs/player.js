@@ -7,15 +7,22 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         //this.body.setCollideWorldBounds(true);//Player collides with boundaries
 
         //set player values
+        this.directionx = 1;
+        this.velocityS = 50;
+        this.drag = 300;
+        this.acceleration = 100;
+        this.JUMP_VELOCITY = -600;
+        this.jumping = false;
+
     }
 }
 class IdleState extends State {//Player idle state
     enter(scene, hero) {
-        //hero.setVelocity(0);
-        hero.body.setDragX(hero.drag);
-        hero.setAccelerationX(0);
-        hero.anims.play(`walk`);
-        //hero.anims.stop();
+        hero.setVelocityX(0);
+        //hero.body.setDragX(hero.drag);
+        //hero.setAccelerationX(0);
+        //hero.anims.play(`walk`);
+        hero.anims.stop();
     }
 
     execute(scene,hero){
@@ -55,14 +62,14 @@ class MoveState extends State {
             hero.directionx = 1;
         }
         
-        hero.body.setAccelerationX(hero.acceleration * hero.directionx);
+        hero.body.setVelocityX(hero.acceleration * hero.directionx);
         hero.anims.play(`walk`, true);
-        if(hero.body.velocity.x > hero.velocityS){
+        /*if(hero.body.velocity.x > hero.velocityS){
             hero.body.velocity.x = hero.velocityS;
         }
         else if(hero.body.velocity.x < -hero.velocityS){
             hero.body.velocity.x = -hero.velocityS;
-        }
+        }*/
         hero.once('animationcomplete', () => {
             this.stateMachine.transition('idle')
         })
@@ -73,22 +80,9 @@ class JumpState extends State{
     enter(scene,player){
         const { up } = scene.keys;
 
-        player.isGrounded = player.body.touching.down;
-	    if(player.isGrounded) {
-            //player.anims.play('walk', true);
-	    	player.jumps = player.MAX_JUMPS;
-	    	player.jumping = false;
-	    }
-
-        if(player.jumps >= 0 && Phaser.Input.Keyboard.DownDuration(up, 150)) {
+        player.isGrounded = player.body.blocked.down;
+        if(player.isGrounded == true && Phaser.Input.Keyboard.DownDuration(up, 150)) {
 	        player.body.velocity.y = player.JUMP_VELOCITY;
-	        player.jumping = true;
-	    }
-
-        if(player.jumping) {
-            scene.sound.play('jump');
-	    	player.jumps--;
-	    	player.jumping = false;
 	    }
 
         /*hero.once('animationcomplete', () => {

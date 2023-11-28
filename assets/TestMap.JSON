@@ -1,12 +1,4 @@
 { "compressionlevel":-1,
- "editorsettings":
-    {
-     "export":
-        {
-         "format":"json",
-         "target":"TestMap.JSON"
-        }
-    },
  "height":15,
  "infinite":false,
  "layers":[
