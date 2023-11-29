@@ -18,6 +18,11 @@ class Play extends Phaser.Scene{
         //Set world stuff
         this.physics.world.gravity.y = 1000;
         this.keys = this.input.keyboard.createCursorKeys();
+        this.keys = this.input.keyboard.addKeys({ up: 'W', left: 'A', down: 'S', right: 'D' });
+        /*keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);*/
 
         //Add background that scrolls with the player
         this.cavern = this.add.tileSprite(0,0,0,0,'backgroundG').setOrigin(0,0).setScrollFactor(0, 1);
@@ -65,10 +70,14 @@ class Play extends Phaser.Scene{
         this.cooldown = true;
         this.input.on('pointerdown', (pointer) => {
             if(this.cooldown == true){
+                let xlength = 10;
+                if(this.player.directionx == -1){
+                    xlength = -32-10;
+                }
                 this.cooldown = false;
-                let tLaser = this.physics.add.sprite(this.player.x,this.player.y-20,'laser').setOrigin(0,0);
+                let tLaser = this.physics.add.sprite(this.player.x+xlength,this.player.y-12,'laser').setOrigin(0,0);
                 //tLaser.body.setVelocityX = 1000;
-                tLaser.body.velocity.x = 500;
+                tLaser.body.velocity.x = 500*this.player.directionx;
                 tLaser.body.allowGravity = false;
                 this.laserGroup.add(tLaser);
                 this.timedEvent = this.time.delayedCall(1000, this.onCooldown, [], this);
