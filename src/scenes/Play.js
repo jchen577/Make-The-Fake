@@ -28,29 +28,30 @@ class Play extends Phaser.Scene{
         const tileset = map.addTilesetImage('platforms','baseTiles');
 
         const Layer1 = map.createLayer('Tile Layer 1',tileset);
+        const Layer2 = map.createLayer('Invis layer',tileset);
 
         //Group creation
         this.laserGroup = this.add.group();
         this.enemyGroup = this.add.group();
-        this.invGroup = this.add.group();
+        //this.invGroup = this.add.group();
 
         //Enemy Spawn
         this.enemyS = map.findObject('spawns',obj => obj.name === 'enemySpawn1');
-        this.inv1 = this.physics.add.sprite(384,map.heightInPixels-128,'tempG');
+        /*this.inv1 = this.physics.add.sprite(384,map.heightInPixels-128,);
         this.inv1.body.setAllowGravity(false);
         this.inv1.setImmovable(true);
         this.invGroup.add(this.inv1);
-        this.inv2 = this.physics.add.sprite(384+316,map.heightInPixels-128,'tempG');
+        this.inv2 = this.physics.add.sprite(384+316,map.heightInPixels-128,);
         this.inv2.setImmovable(true);
         this.inv2.body.setAllowGravity(false);
-        this.invGroup.add(this.inv2);
+        this.invGroup.add(this.inv2);*/
         /*let enemy = this.physics.add.sprite(this.enemyS.x,this.enemyS.y,'enemyR').setScale(1.5,1.5);
         enemy.body.immovable = true;
         this.enemyGroup.add(enemy);
         this.enemyC1+=1;*/
 
         //Create Klungo walking sprite
-        const klungoSpawn = map.findObject('spawns',obj => obj.name === 'playerSpawn')
+        const klungoSpawn = map.findObject('spawns',obj => obj.name === 'playerSpawn');
         this.player = new Player(this,klungoSpawn.x,klungoSpawn.y,'klungoWalk',0).setScale(2,2);
         this.player.setSize(20,32);
         this.player.body.setCollideWorldBounds(true);
@@ -109,27 +110,33 @@ class Play extends Phaser.Scene{
         this.physics.add.collider(this.enemyGroup,Layer1);
 
         //Enemy movement
-        this.physics.add.collider(this.invGroup,this.enemyGroup,(sprite,enemyG)=>{
-            if(enemyG.body.velocity.x < 0){
-                enemyG.setVelocityX(100);
-            } else{
-                enemyG.setVelocityX(-100);
-            }
+        Layer2.setCollisionByProperty({
+            collisions: true,
         });
+        //this.physics.add.collider(Layer2,this.enemyGroup,(enemyG,layer)=>{
+            this.physics.add.collider(Layer2,this.enemyGroup);
+            //enemyG.setVelocityX(enemyG.body.velocity.x*-1);
+        //});
     }
 
     update(){
         this.cavern.setTilePosition(this.cameras.main.scrollX);
         if(!gameOver){
             this.playerFSM.step();
-            if(this.enemyC1 != 1){
-                let enemyN = this.physics.add.sprite(this.enemyS.x,this.enemyS.y,'enemyR').setScale(1.5,1.5);
-                enemyN.body.immovable = true;
-                this.enemyGroup.add(enemyN);
-                enemyN.setVelocityX(-100);
+            if(this.enemyC1 <= 1){
                 this.enemyC1 +=1;
+                this.timedEvent2 = this.time.delayedCall(5000, this.mobSpawn, [], this);
             }
         }
+    }
+
+    mobSpawn(){
+        let enemyN = this.physics.add.sprite(this.enemyS.x,this.enemyS.y,'enemyR').setScale(1.5,1.5);
+        enemyN.body.immovable = true;
+        this.enemyGroup.add(enemyN);
+        enemyN.setVelocityX(-Math.round(Math.random()*50+50));
+        enemyN.setBounce(1);
+        //this.enemyC1 +=1;
     }
 
     onCooldown(){
