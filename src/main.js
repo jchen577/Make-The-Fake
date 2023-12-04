@@ -13,10 +13,11 @@ let config = {
             debug: false,
         }
     },
-    scene: [ Menu, Play, GameOver]
+    scene: [ Menu, Play, GameOver, Load]
 }
 
 let game = new Phaser.Game(config);
 let borderUISize = game.config.height/15;
 let borderPadding = borderUISize/3;
 let keyF,keyR,keyLEFT,keyRIGHT;
+let gameOver = false;
