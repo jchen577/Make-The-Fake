@@ -12,6 +12,9 @@ class Load extends Phaser.Scene {
         this.load.tilemapTiledJSON('tilemap','assets/TestMap.JSON');
         this.load.image('backgroundG','assets/Background.png');
         this.load.image('tempG','assets/Ground1.png');
+        this.load.image('earth','assets/earth.png');
+        this.load.image('emptyP','assets/emptyP.png');
+        this.load.bitmapFont('gem_font', 'assets/gem.png', 'assets/gem.xml')
     }
 
     create(){

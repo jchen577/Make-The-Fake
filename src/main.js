@@ -4,7 +4,7 @@ Name: Jacky Chen
 const tileSize = 32;
 
 let config = {
-    type: Phaser.AUTO,
+    type: Phaser.WEBGL,
     width: 640,
     height: 480,
     physics: {

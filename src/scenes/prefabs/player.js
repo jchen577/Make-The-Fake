@@ -8,9 +8,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
         //set player values
         this.directionx = 1;
-        this.velocityS = 50;
+        this.velocityS = 100;
         this.drag = 300;
-        this.acceleration = 100;
+        this.acceleration = 125;
         this.JUMP_VELOCITY = -500;
         this.jumping = false;
 
