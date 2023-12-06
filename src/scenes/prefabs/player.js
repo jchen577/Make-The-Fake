@@ -83,6 +83,7 @@ class JumpState extends State{
         player.isGrounded = player.body.blocked.down;
         if(player.isGrounded == true && Phaser.Input.Keyboard.DownDuration(up, 150)) {
 	        player.body.velocity.y = player.JUMP_VELOCITY;
+            scene.sound.play('jumpS',{volume: 0.1});
 	    }
 
         /*hero.once('animationcomplete', () => {

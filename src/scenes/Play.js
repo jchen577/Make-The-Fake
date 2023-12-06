@@ -1,4 +1,6 @@
 //Tilemap stuff credits: https://blog.ourcade.co/posts/2020/phaser-3-noob-guide-loading-tiled-tilemaps/
+//https://pixabay.com/music/search/cave%20music/ cave of light
+//https://pixabay.com/sound-effects/search/laser/ beam 8
 class Play extends Phaser.Scene{
     constructor(){
         super("playScene");
@@ -10,6 +12,7 @@ class Play extends Phaser.Scene{
 
     create(){
         //Set world stuff
+        this.tweening = false;
         this.enemyC1 = 0;
         this.physics.world.gravity.y = 1000;
         this.keys = this.input.keyboard.createCursorKeys();
@@ -44,8 +47,8 @@ class Play extends Phaser.Scene{
         this.endP.body.allowGravity = false;
 
         //Create Klungo walking sprite
-        const klungoSpawn = map.findObject('spawns',obj => obj.name === 'playerSpawn');
-        this.player = new Player(this,klungoSpawn.x,klungoSpawn.y,'klungoWalk',0).setScale(2,2);
+        this.klungoSpawn = map.findObject('spawns',obj => obj.name === 'playerSpawn');
+        this.player = new Player(this,this.klungoSpawn.x,this.klungoSpawn.y,'klungoWalk',0).setScale(2,2);
         this.player.setSize(20,32);
         this.player.body.setCollideWorldBounds(true);
         this.cameras.main.setBounds(0,0,map.widthInPixels,map.heightInPixels);
@@ -64,24 +67,34 @@ class Play extends Phaser.Scene{
         //player shot
         this.cooldown = true;
         this.input.on('pointerdown', (pointer) => {
-            if(!gameOver){
-                if(this.cooldown == true){
-                    let xlength = 10;
-                    if(this.player.directionx == -1){
-                        xlength = -32-10;
+            if(!this.tweening){
+                if(!gameOver){
+                    if(this.cooldown == true){
+                        let xlength = 10;
+                        if(this.player.directionx == -1){
+                            xlength = -32-10;
+                        }
+                        this.cooldown = false;
+                        let tLaser = this.physics.add.sprite(this.player.x+xlength,this.player.y-12,'laser').setOrigin(0,0);
+                        //tLaser.body.setVelocityX = 1000;
+                        tLaser.setSize(28,16);
+                        tLaser.body.velocity.x = 500*this.player.directionx;
+                        tLaser.body.allowGravity = false;
+                        this.laserGroup.add(tLaser);
+                        this.sound.play('gunShot',{volume: 0.1});
+                        this.timedEvent = this.time.delayedCall(1000, this.onCooldown, [], this);
                     }
-                    this.cooldown = false;
-                    let tLaser = this.physics.add.sprite(this.player.x+xlength,this.player.y-12,'laser').setOrigin(0,0);
-                    //tLaser.body.setVelocityX = 1000;
-                    tLaser.setSize(28,16);
-                    tLaser.body.velocity.x = 500*this.player.directionx;
-                    tLaser.body.allowGravity = false;
-                    this.laserGroup.add(tLaser);
-                    this.timedEvent = this.time.delayedCall(1000, this.onCooldown, [], this);
                 }
             }
-
         })
+        //Background music
+        this.bgm = this.sound.add('caveMusic', { 
+            mute: false,
+            volume: 0.1,
+            rate: 1,
+            loop: true 
+        });
+        this.bgm.play();
 
         //Laser Collision
         this.physics.add.collider(this.enemyGroup,this.laserGroup,(enemyN,laser)=>{
@@ -92,16 +105,56 @@ class Play extends Phaser.Scene{
 
         this.physics.add.collider(this.enemyGroup,this.player,(enemyN,player)=>{
             gameOver = true;
-            this.player.destroy();
-            this.planet1.destroy();
+            this.player.setPosition(this.player.x,map.widthInPixels+50);
+            this.planet1.setPosition(-200,0);
+            //this.planet1.destroy();
         });
 
         //Tweening
-        const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY;
+        this.centerX = this.cameras.main.centerX;
+        this.centerY = this.cameras.main.centerY;
         const w = this.cameras.main.width
         const h = this.cameras.main.height
-        this.instructionText = this.add.bitmapText(centerX, centerY+180, 'gem_font', '', 24).setOrigin(0.5);
+
+        this.greenB = this.add.rectangle(-640,240,640,480,0x355E3B);
+        this.talkB = this.add.rectangle(this.centerX-200,this.centerY+125,390, 100, 0x000000).setOrigin(0,0).setAlpha(0);
+        this.talkW1 = this.add.rectangle(this.centerX-195,this.centerY+130,380, 5, 0xFFFFFF).setOrigin(0,0).setAlpha(0);
+        this.talkW2 = this.add.rectangle(this.centerX-195,this.centerY+215,380, 5, 0xFFFFFF).setOrigin(0,0).setAlpha(0);
+        this.talkW3 = this.add.rectangle(this.centerX-195,this.centerY+130,5, 85, 0xFFFFFF).setOrigin(0,0).setAlpha(0);
+        this.talkW4 = this.add.rectangle(this.centerX+180,this.centerY+130,5, 85, 0xFFFFFF).setOrigin(0,0).setAlpha(0);
+        this.instructionText = this.add.bitmapText(this.centerX, this.centerY+175, 'gem_font', '', 24).setOrigin(0.5);
+
+        let textTween = this.tweens.chain({
+            targets: [this.instructionText,this.talkB,this.talkW1,this.talkW2,this.talkW3,this.talkW4],
+            ease: 'Sine.easeOut',
+            loop: 0,
+            paused: true,
+            tweens: [
+            {
+                x:-600,
+                duration:1000,
+            }
+        ]});
+
+        let backgroundTween = this.tweens.chain({
+            targets: this.greenB,
+            ease: 'Bounce.easeOut',
+            loop: 0,
+            paused: true,
+            tweens: [
+            {
+                x:320,
+                duration:1000,
+                hold: 8000,
+                
+            },
+            {
+                x: -640,
+                duration: 1000,
+                ease: 'Sine.easeOut',
+            }
+            
+        ]});
 
         this.testP = this.add.sprite(-200,200,'klungoWalk').setScale(10,10);
         let startTween = this.tweens.chain({
@@ -114,14 +167,28 @@ class Play extends Phaser.Scene{
                     x: 200,
                     duration: 1000,
                     onStart: () => {
+                        this.tweening = true;
+                        backgroundTween.restart();
                         this.input.keyboard.enabled = false;
                     },
                 },
                 {
                     x: 200,
-                    hold: 5000,
+                    hold: 4000,
                     onStart: ()=> {
-                        this.instructionText.text = 'Hello! I am Klungo!\nMove me with W, A, D\nShoot with left click'
+                        this.talkB.setAlpha(1);
+                        this.talkW1.setAlpha(1);
+                        this.talkW2.setAlpha(1);
+                        this.talkW3.setAlpha(1);
+                        this.talkW4.setAlpha(1);
+                        this.instructionText.text = 'Hello! I am Klungo!\nMove me with W, A, D\nShoot with left click';
+                    }
+                },
+                {
+                    x: 200,
+                    hold: 3000,
+                    onStart: ()=> {
+                        this.instructionText.text = 'Now take me to the end!\nThe Planet depends on us!';
                     }
                 },
                 {
@@ -130,7 +197,8 @@ class Play extends Phaser.Scene{
                     ease: 'Sine.easeOut',
                     onComplete: ()=>{
                         this.input.keyboard.enabled = true;
-                        this.instructionText.destroy();
+                        this.tweening = false;
+                        textTween.restart();
                     }
                 },
             ]
@@ -158,38 +226,38 @@ class Play extends Phaser.Scene{
         this.nextSpawn = this.time.now + 1000;
         //Spawn mobs at the beginning
         this.mobSpawn(this.enemyS.x,this.enemyS.y);
-
     }
 
     update(){
-        this.cavern.setTilePosition(this.cameras.main.scrollX);
         if(!gameOver){
+            this.cavern.setTilePosition(this.centerX+320,this.centerY-240);
             this.playerFSM.step();
+            this.planet1.y = this.player.y-54;
             if(this.player.directionx == -1){
                 this.planet1.x = this.player.x+10;
             }
             else{
                 this.planet1.x = this.player.x-13;
             }
-            this.planet1.y = this.player.y-54;
             if(this.player.y> 480){
                 gameOver = true;
-                this.planet1.destroy();
             }
             if(this.enemyC1 <= 1){
                 this.timedEvent2 = this.time.delayedCall(1000, this.mobSpawn, [this.enemyS.x,this.enemyS.y], this);
             }
         }
         else if(gameOver){
+            this.player.setVelocityX(0);
+            this.planet1.setPosition(-200,0);
             if(Phaser.Input.Keyboard.JustDown(keyR)){
                 gameOver = false;
-                this.scene.start('playScene');
+                this.player.setPosition(this.klungoSpawn.x,this.klungoSpawn.y);
             }
         }
     }
 
     mobSpawn(enemyx,enemyy){
-        if(this.nextSpawn <= this.time.now){
+        if(this.nextSpawn <= this.time.now && !this.tweening){
             let enemyN = this.physics.add.sprite(enemyx,enemyy,'enemyR').setScale(1.5,1.5);
             enemyN.body.immovable = true;
             this.enemyGroup.add(enemyN);

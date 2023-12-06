@@ -14,7 +14,11 @@ class Load extends Phaser.Scene {
         this.load.image('tempG','assets/Ground1.png');
         this.load.image('earth','assets/earth.png');
         this.load.image('emptyP','assets/emptyP.png');
-        this.load.bitmapFont('gem_font', 'assets/gem.png', 'assets/gem.xml')
+        this.load.bitmapFont('gem_font', 'assets/gem.png', 'assets/gem.xml');
+        this.load.audio('caveMusic', './assets/caveMusic.mp3');
+        this.load.audio('gunShot', './assets/beamSound.mp3');
+        this.load.audio('jumpS', './assets/jump.mp3');
+        this.load.audio('click', './assets/click.mp3');
     }
 
     create(){
@@ -27,6 +31,6 @@ class Load extends Phaser.Scene {
             frameRate: 4,
             repeat: -1 
         })
-        this.scene.start('playScene');
+        this.scene.start('menuScene');
     }
 }
