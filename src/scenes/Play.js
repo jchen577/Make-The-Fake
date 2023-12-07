@@ -14,15 +14,13 @@ class Play extends Phaser.Scene{
         //Set world stuff
         this.tweening = false;
         this.enemyC1 = 0;
+        this.enemyC2 = 0;
+        this.enemyC3 = 0;
         this.physics.world.gravity.y = 1000;
         this.keys = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys({ up: 'W', left: 'A', down: 'S', right: 'D'});
 
         keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-        /*keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-        keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-        keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);*/
 
         //Add background that scrolls with the player
         this.cavern = this.add.tileSprite(0,0,0,0,'backgroundG').setOrigin(0,0).setScrollFactor(0, 1);
@@ -37,10 +35,13 @@ class Play extends Phaser.Scene{
         //Group creation
         this.laserGroup = this.add.group();
         this.enemyGroup = this.add.group();
+        this.projEnemyGroup = this.add.group();
         //this.invGroup = this.add.group();
 
         //Enemy Spawn
         this.enemyS = map.findObject('spawns',obj => obj.name === 'enemySpawn1');
+        this.enemyS2 = map.findObject('spawns',obj => obj.name === 'enemySpawn2');
+        this.enemyS3 = map.findObject('spawns',obj => obj.name === 'enemySpawn3');
        
         this.end = map.findObject('spawns',obj=>obj.name === 'endPoint');
         this.endP = this.physics.add.sprite(this.end.x,this.end.y,'emptyP').setScale(1.5,1.5);
@@ -49,7 +50,7 @@ class Play extends Phaser.Scene{
         //Create Klungo walking sprite
         this.klungoSpawn = map.findObject('spawns',obj => obj.name === 'playerSpawn');
         this.player = new Player(this,this.klungoSpawn.x,this.klungoSpawn.y,'klungoWalk',0).setScale(2,2);
-        this.player.setSize(20,32);
+        this.player.setSize(20,28);
         this.player.body.setCollideWorldBounds(true);
         this.cameras.main.setBounds(0,0,map.widthInPixels,map.heightInPixels);
         this.cameras.main.startFollow(this.player,true,0.25,0.25);
@@ -100,7 +101,27 @@ class Play extends Phaser.Scene{
         this.physics.add.collider(this.enemyGroup,this.laserGroup,(enemyN,laser)=>{
             enemyN.destroy();
             laser.destroy();
-            this.enemyC1 -= 1;
+            if(enemyN.x < 670){
+                this.enemyC1 -= 1;
+            }
+            else if(enemyN.x > 1615){
+                this.enemyC2 -= 1;
+            }
+            else if(enemyN.x < 1615){
+                this.enemyC3 -= 1;
+            }
+        });
+
+        this.physics.add.collider(this.projEnemyGroup,this.laserGroup,(enemyN,laser)=>{
+            enemyN.destroy();
+            laser.destroy();
+        });
+
+        this.physics.add.collider(this.projEnemyGroup,this.player,(enemyN,player)=>{
+            gameOver = true;
+            this.player.setPosition(this.player.x,map.widthInPixels+50);
+            this.planet1.setPosition(-200,0);
+            //this.planet1.destroy();
         });
 
         this.physics.add.collider(this.enemyGroup,this.player,(enemyN,player)=>{
@@ -108,6 +129,18 @@ class Play extends Phaser.Scene{
             this.player.setPosition(this.player.x,map.widthInPixels+50);
             this.planet1.setPosition(-200,0);
             //this.planet1.destroy();
+        });
+
+        this.physics.add.collider(this.endP,this.player,()=>{
+            this.scene.start('gameOverScene');
+        });
+
+        this.endWall = this.add.rectangle(-30,0,10, 480, 0x000000).setOrigin(0,0).setAlpha(0);
+        this.physics.add.existing(this.endWall);
+        this.endWall.body.allowGravity = false;
+        this.endWall.body.immovable = true;
+        this.physics.add.collider(this.projEnemyGroup,this.endWall,(ene,endW)=>{
+            ene.destroy();
         });
 
         //Tweening
@@ -145,7 +178,7 @@ class Play extends Phaser.Scene{
             {
                 x:320,
                 duration:1000,
-                hold: 8000,
+                hold: 5500,
                 
             },
             {
@@ -174,7 +207,7 @@ class Play extends Phaser.Scene{
                 },
                 {
                     x: 200,
-                    hold: 4000,
+                    hold: 2500,
                     onStart: ()=> {
                         this.talkB.setAlpha(1);
                         this.talkW1.setAlpha(1);
@@ -186,7 +219,7 @@ class Play extends Phaser.Scene{
                 },
                 {
                     x: 200,
-                    hold: 3000,
+                    hold: 2000,
                     onStart: ()=> {
                         this.instructionText.text = 'Now take me to the end!\nThe Planet depends on us!';
                     }
@@ -220,12 +253,20 @@ class Play extends Phaser.Scene{
             collisions: true,
         });
         //this.physics.add.collider(Layer2,this.enemyGroup,(enemyG,layer)=>{
-            this.physics.add.collider(Layer2,this.enemyGroup);
+        this.physics.add.collider(Layer2,this.enemyGroup);
             //enemyG.setVelocityX(enemyG.body.velocity.x*-1);
         //});
         this.nextSpawn = this.time.now + 1000;
+        this.nextSpawn1 = this.time.now + 1000;
+        this.nextSpawn2 = this.time.now + 1000;
+        this.nextProjSpawn = this.time.now+1000;
         //Spawn mobs at the beginning
-        this.mobSpawn(this.enemyS.x,this.enemyS.y);
+        this.mobSpawn(this.enemyS.x,this.enemyS.y,this.enemyC1,this.nextSpawn);
+        this.mobSpawn(this.enemyS2.x,this.enemyS2.y,this.enemyC2,this.nextSpawn1);
+        this.mobSpawn(this.enemyS3.x,this.enemyS3.y,this.enemyC3,this.nextSpawn2);
+
+
+        this.deadText = this.add.bitmapText(this.centerX, this.centerY, 'gem_font', 'Press R to respawn', 40).setOrigin(0.5).setAlpha(0);
     }
 
     update(){
@@ -243,28 +284,88 @@ class Play extends Phaser.Scene{
                 gameOver = true;
             }
             if(this.enemyC1 <= 1){
-                this.timedEvent2 = this.time.delayedCall(1000, this.mobSpawn, [this.enemyS.x,this.enemyS.y], this);
+                this.mobSpawn(this.enemyS.x,this.enemyS.y,this.enemyC1,this.nextSpawn);
             }
+            if(this.enemyC2 <= 1){
+                this.mobSpawn(this.enemyS2.x,this.enemyS2.y,this.enemyC2,this.nextSpawn1);
+            }
+            if(this.enemyC3 <= 1){
+                this.mobSpawn(this.enemyS3.x,this.enemyS3.y,this.enemyC3,this.nextSpawn2);
+            }
+            this.projectileMobSpawn();
         }
         else if(gameOver){
+            this.enemyGroup.clear(true);
+            this.projEnemyGroup.clear(true);
             this.player.setVelocityX(0);
             this.planet1.setPosition(-200,0);
+            this.deadText.setAlpha(1);
+            this.enemyC1 = 0;
+            this.enemyC2 = 0;
+            this.enemyC3 = 0;
+            if(this.player.x > 320){
+                this.deadText.setPosition(this.player.x,this.centerY);
+            }
+            else{
+                this.deadText.setPosition(this.centerX,this.centerY);
+            }
             if(Phaser.Input.Keyboard.JustDown(keyR)){
                 gameOver = false;
                 this.player.setPosition(this.klungoSpawn.x,this.klungoSpawn.y);
+                this.deadText.setAlpha(0);
             }
         }
     }
 
-    mobSpawn(enemyx,enemyy){
-        if(this.nextSpawn <= this.time.now && !this.tweening){
-            let enemyN = this.physics.add.sprite(enemyx,enemyy,'enemyR').setScale(1.5,1.5);
-            enemyN.body.immovable = true;
-            this.enemyGroup.add(enemyN);
-            enemyN.setVelocityX(-Math.round(Math.random()*50+100));
-            enemyN.setBounce(1);
-            this.enemyC1 +=1;
-            this.nextSpawn = this.time.now + 5000;
+    projectileMobSpawn(){
+        if(this.nextProjSpawn <= this.time.now && !this.tweening){
+            let enemyP = this.physics.add.sprite(this.player.x+640,this.player.y,'enemyG');
+            enemyP.body.immovable = true;
+            enemyP.body.allowGravity = false;
+            enemyP.setVelocityX(-200);
+            this.projEnemyGroup.add(enemyP);
+            this.nextProjSpawn = this.time.now + 2000;
+        }
+    }
+
+    mobSpawn(enemyx,enemyy,counter,spawner){
+        if(spawner <= this.time.now && !this.tweening){
+            let dir = Math.round(Math.random()*2);
+            let vel = 0;
+            if(dir == 1){
+                vel = -1;
+            }
+            else{
+                vel = 1;
+            }
+            vel = vel*Math.round(Math.random()*50+100)
+            if(enemyx < 670 && this.enemyC1 <= 1){
+                let enemyN = this.physics.add.sprite(enemyx,enemyy,'enemyR').setScale(1.5,1.5);
+                enemyN.body.immovable = true;
+                this.enemyGroup.add(enemyN);
+                enemyN.setVelocityX(vel);
+                enemyN.setBounce(1);
+                this.enemyC1 +=1;
+                this.nextSpawn = this.time.now + 5000;
+            }
+            else if(enemyx > 1615 && this.enemyC2 <= 1){
+                let enemyN = this.physics.add.sprite(enemyx,enemyy,'enemyR').setScale(1.5,1.5);
+                enemyN.body.immovable = true;
+                this.enemyGroup.add(enemyN);
+                enemyN.setVelocityX(vel);
+                enemyN.setBounce(1);
+                this.enemyC2 +=1;
+                this.nextSpawn1 = this.time.now + 5000;
+            }
+            else if(enemyx < 1615 && this.enemyC3 <= 1){
+                let enemyN = this.physics.add.sprite(enemyx,enemyy,'enemyR').setScale(1.5,1.5);
+                enemyN.body.immovable = true;
+                this.enemyGroup.add(enemyN);
+                enemyN.setVelocityX(vel);
+                enemyN.setBounce(1);
+                this.enemyC3 +=1;
+                this.nextSpawn2 = this.time.now + 5000;
+            }
         }
         //this.enemyC1 +=1;
     }
