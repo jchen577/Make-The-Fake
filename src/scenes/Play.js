@@ -145,6 +145,7 @@ class Play extends Phaser.Scene{
         const w = this.cameras.main.width
         const h = this.cameras.main.height
 
+        //Add rectangles to create a textbox look
         this.greenB = this.add.rectangle(-640,240,640,480,0x355E3B);
         this.talkB = this.add.rectangle(this.centerX-200,this.centerY+125,390, 100, 0x000000).setOrigin(0,0).setAlpha(0);
         this.talkW1 = this.add.rectangle(this.centerX-195,this.centerY+130,380, 5, 0xFFFFFF).setOrigin(0,0).setAlpha(0);
@@ -153,7 +154,7 @@ class Play extends Phaser.Scene{
         this.talkW4 = this.add.rectangle(this.centerX+180,this.centerY+130,5, 85, 0xFFFFFF).setOrigin(0,0).setAlpha(0);
         this.instructionText = this.add.bitmapText(this.centerX, this.centerY+175, 'gem_font', '', 24).setOrigin(0.5);
 
-        let textTween = this.tweens.chain({
+        let textTween = this.tweens.chain({//Set Tween to tween text box
             targets: [this.instructionText,this.talkB,this.talkW1,this.talkW2,this.talkW3,this.talkW4],
             ease: 'Sine.easeOut',
             loop: 0,
@@ -165,7 +166,7 @@ class Play extends Phaser.Scene{
             }
         ]});
 
-        let backgroundTween = this.tweens.chain({
+        let backgroundTween = this.tweens.chain({//Set Tween to move background only
             targets: this.greenB,
             ease: 'Bounce.easeOut',
             loop: 0,
@@ -185,8 +186,8 @@ class Play extends Phaser.Scene{
             
         ]});
 
-        this.testP = this.add.sprite(-200,200,'klungoWalk').setScale(10,10);
-        let startTween = this.tweens.chain({
+        this.testP = this.add.sprite(-200,200,'klungoWalk').setScale(10,10);//Make larger klungo to use for tweening
+        let startTween = this.tweens.chain({//Set tween to move klungo only
             targets: this.testP,
             ease: 'Bounce.easeOut',
             loop: 0,
@@ -205,6 +206,7 @@ class Play extends Phaser.Scene{
                     x: 200,
                     hold: 2500,
                     onStart: ()=> {
+                        //Set text to be visible
                         this.talkB.setAlpha(1);
                         this.talkW1.setAlpha(1);
                         this.talkW2.setAlpha(1);
@@ -232,7 +234,7 @@ class Play extends Phaser.Scene{
                 },
             ]
         })
-        startTween.restart();
+        startTween.restart();//Start Tween when game begins
 
         //Collision with the map
         Layer1.setCollisionByProperty({
@@ -249,6 +251,7 @@ class Play extends Phaser.Scene{
             collisions: true,
         });
         this.physics.add.collider(Layer2,this.enemyGroup);
+        //Mob spawn timers
         this.nextSpawn = this.time.now + 1000;
         this.nextSpawn1 = this.time.now + 1000;
         this.nextSpawn2 = this.time.now + 1000;
@@ -263,7 +266,7 @@ class Play extends Phaser.Scene{
     }
 
     update(){
-        if(!gameOver){
+        if(!gameOver){//While player not dead
             this.cavern.setTilePosition(this.centerX+320,this.centerY-240);
             this.playerFSM.step();
             this.planet1.y = this.player.y-54;
@@ -276,6 +279,7 @@ class Play extends Phaser.Scene{
             if(this.player.y> 480){
                 gameOver = true;
             }
+            //Spawn mobs in max has not been reached
             if(this.enemyC1 <= 1){
                 this.mobSpawn(this.enemyS.x,this.enemyS.y,this.enemyC1,this.nextSpawn);
             }
@@ -288,6 +292,7 @@ class Play extends Phaser.Scene{
             this.projectileMobSpawn();
         }
         else if(gameOver){
+            //Reset everything once player dies
             this.enemyGroup.clear(true);
             this.projEnemyGroup.clear(true);
             this.player.setVelocityX(0);
@@ -310,7 +315,7 @@ class Play extends Phaser.Scene{
         }
     }
 
-    projectileMobSpawn(){
+    projectileMobSpawn(){//Spawn projectile mobs
         if(this.nextProjSpawn <= this.time.now && !this.tweening){
             let enemyP = this.physics.add.sprite(this.player.x+640,this.player.y,'enemyG');
             enemyP.body.immovable = true;
@@ -321,7 +326,7 @@ class Play extends Phaser.Scene{
         }
     }
 
-    mobSpawn(enemyx,enemyy,counter,spawner){
+    mobSpawn(enemyx,enemyy,counter,spawner){//Spawn area specific mobs
         if(spawner <= this.time.now && !this.tweening){
             let dir = Math.round(Math.random()*2);
             let vel = 0;
