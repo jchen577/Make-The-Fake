@@ -4,8 +4,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this)           // add Hero to existing scene
         scene.physics.add.existing(this)   // add physics body to scene
 
-        //this.body.setCollideWorldBounds(true);//Player collides with boundaries
-
         //set player values
         this.directionx = 1;
         this.velocityS = 100;
@@ -19,9 +17,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 class IdleState extends State {//Player idle state
     enter(scene, hero) {
         hero.setVelocityX(0);
-        //hero.body.setDragX(hero.drag);
-        //hero.setAccelerationX(0);
-        //hero.anims.play(`walk`);
         hero.anims.stop();
     }
 
@@ -64,12 +59,6 @@ class MoveState extends State {
         
         hero.body.setVelocityX(hero.acceleration * hero.directionx);
         hero.anims.play(`walk`, true);
-        /*if(hero.body.velocity.x > hero.velocityS){
-            hero.body.velocity.x = hero.velocityS;
-        }
-        else if(hero.body.velocity.x < -hero.velocityS){
-            hero.body.velocity.x = -hero.velocityS;
-        }*/
         hero.once('animationcomplete', () => {
             this.stateMachine.transition('idle')
         })
@@ -85,10 +74,6 @@ class JumpState extends State{
 	        player.body.velocity.y = player.JUMP_VELOCITY;
             scene.sound.play('jumpS',{volume: 0.1});
 	    }
-
-        /*hero.once('animationcomplete', () => {
-            this.stateMachine.transition('idle')
-        })*/
         this.stateMachine.transition('idle');
     }
 }

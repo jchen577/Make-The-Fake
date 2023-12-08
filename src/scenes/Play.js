@@ -7,7 +7,6 @@ class Play extends Phaser.Scene{
     }
 
     preload(){
-        //this.load.spritesheet('klungoWalk','./assets/KlungoWalk.png',{frameWidth: 32, frameHeight: 32});
     }
 
     create(){
@@ -36,7 +35,6 @@ class Play extends Phaser.Scene{
         this.laserGroup = this.add.group();
         this.enemyGroup = this.add.group();
         this.projEnemyGroup = this.add.group();
-        //this.invGroup = this.add.group();
 
         //Enemy Spawn
         this.enemyS = map.findObject('spawns',obj => obj.name === 'enemySpawn1');
@@ -63,7 +61,6 @@ class Play extends Phaser.Scene{
             move: new MoveState(),
             jump: new JumpState(),
         }, [this, this.player]);
-        //this.player.anims.play('walk');
 
         //player shot
         this.cooldown = true;
@@ -77,7 +74,6 @@ class Play extends Phaser.Scene{
                         }
                         this.cooldown = false;
                         let tLaser = this.physics.add.sprite(this.player.x+xlength,this.player.y-12,'laser').setOrigin(0,0);
-                        //tLaser.body.setVelocityX = 1000;
                         tLaser.setSize(28,16);
                         tLaser.body.velocity.x = 500*this.player.directionx;
                         tLaser.body.allowGravity = false;
@@ -252,10 +248,7 @@ class Play extends Phaser.Scene{
         Layer2.setCollisionByProperty({
             collisions: true,
         });
-        //this.physics.add.collider(Layer2,this.enemyGroup,(enemyG,layer)=>{
         this.physics.add.collider(Layer2,this.enemyGroup);
-            //enemyG.setVelocityX(enemyG.body.velocity.x*-1);
-        //});
         this.nextSpawn = this.time.now + 1000;
         this.nextSpawn1 = this.time.now + 1000;
         this.nextSpawn2 = this.time.now + 1000;
@@ -367,7 +360,6 @@ class Play extends Phaser.Scene{
                 this.nextSpawn2 = this.time.now + 5000;
             }
         }
-        //this.enemyC1 +=1;
     }
 
     onCooldown(){
