@@ -21,9 +21,14 @@ class IdleState extends State {//Player idle state
     }
 
     execute(scene,hero){
-        const { left, right, up, } = scene.keys;
+        const { left, right, up} = scene.keys;
         //transition to new states
         if(Phaser.Input.Keyboard.JustDown(up)) {
+            this.stateMachine.transition('jump');
+            return;
+        }
+
+        if(Phaser.Input.Keyboard.JustDown(keySpace)) {
             this.stateMachine.transition('jump');
             return;
         }
@@ -43,6 +48,12 @@ class MoveState extends State {
             this.stateMachine.transition('jump');
             return;
         }
+
+        if(Phaser.Input.Keyboard.JustDown(keySpace)) {
+            this.stateMachine.transition('jump');
+            return;
+        }
+
         //Character movement
         if(!(left.isDown || right.isDown )) {
             this.stateMachine.transition('idle');
@@ -73,7 +84,10 @@ class JumpState extends State{
         if(player.isGrounded == true && Phaser.Input.Keyboard.DownDuration(up, 150)) {
 	        player.body.velocity.y = player.JUMP_VELOCITY;
             scene.sound.play('jumpS',{volume: 0.1});
-	    }
+	    }else if(player.isGrounded == true && Phaser.Input.Keyboard.DownDuration(keySpace, 150)){
+            player.body.velocity.y = player.JUMP_VELOCITY;
+            scene.sound.play('jumpS',{volume: 0.1});
+        }
         this.stateMachine.transition('idle');
     }
 }

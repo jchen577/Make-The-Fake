@@ -17,9 +17,11 @@ class Play extends Phaser.Scene{
         this.enemyC3 = 0;
         this.physics.world.gravity.y = 1000;
         this.keys = this.input.keyboard.createCursorKeys();
-        this.keys = this.input.keyboard.addKeys({ up: 'W', left: 'A', down: 'S', right: 'D'});
+        this.keys = this.input.keyboard.addKeys({ up: 'W', left: 'A', down: 'S', right: 'D',});
+
 
         keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
         //Add background that scrolls with the player
         this.cavern = this.add.tileSprite(0,0,0,0,'backgroundG').setOrigin(0,0).setScrollFactor(0, 1);
