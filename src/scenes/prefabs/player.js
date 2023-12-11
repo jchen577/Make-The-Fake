@@ -21,7 +21,7 @@ class IdleState extends State {//Player idle state
     }
 
     execute(scene,hero){
-        const { left, right, up, keySpace} = scene.keys;
+        const { left, right, up,} = scene.keys;
         //transition to new states
         if(Phaser.Input.Keyboard.JustDown(up)) {
             this.stateMachine.transition('jump');
@@ -48,8 +48,7 @@ class MoveState extends State {
             this.stateMachine.transition('jump');
             return;
         }
-
-        if(Phaser.Input.Keyboard.JustDown(keySpace)) {
+        else if(Phaser.Input.Keyboard.JustDown(keySpace)) {
             this.stateMachine.transition('jump');
             return;
         }
