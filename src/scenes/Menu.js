@@ -18,10 +18,19 @@ class Menu extends Phaser.Scene{
             useHandCursor: true,
         });
 
+        this.credText.setInteractive({
+            useHandCursor: true,
+        });
+
         this.playText.on('pointerdown', ()=>{
             this.sound.play('click',{volume: 0.1});
             this.scene.start('playScene')
         });
+
+        this.credText.on('pointerdown',()=>{
+            this.sound.play('click',{volume: 0.1});
+            this.scene.start('creditScene')
+        })
 
     }
 
